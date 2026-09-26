@@ -6,6 +6,8 @@ const markerFiles = ['package.json', 'pyproject.toml', 'requirements.txt', 'go.m
 const ignoredDirectories = new Set([
   '.git', '.build', '.cache', '.codex', '.idea', '.next', '.nuxt', '.output', '.turbo',
   '.venv', 'build', 'coverage', 'dist', 'node_modules', 'target', 'vendor', '__pycache__',
+  // Windows 用户目录下的系统与程序数据，扫描它们既慢又不会有开发项目。
+  'AppData', 'Application Data', 'Program Files', 'Program Files (x86)', 'ProgramData', 'Windows', '$Recycle.Bin',
 ]);
 const portPattern = /(?:PORT\s*=\s*|--port(?:=|\s+)|-p\s+)(\d{2,5})/i;
 

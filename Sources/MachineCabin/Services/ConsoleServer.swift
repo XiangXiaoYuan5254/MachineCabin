@@ -138,7 +138,7 @@ final class ConsoleServer: ObservableObject {
                 self.ownsServerProcess = false
                 self.serverProcess = nil
                 if self.phase == .ready {
-                    self.phase = .failed("服务端已退出（状态码 (terminatedProcess.terminationStatus)）。")
+                    self.phase = .failed("服务端已退出（状态码 \(terminatedProcess.terminationStatus)）。")
                 }
             }
         }

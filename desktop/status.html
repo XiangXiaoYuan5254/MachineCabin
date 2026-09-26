@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+    <title>机舱</title>
+    <style>
+      :root {
+        font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        color: #17211d;
+        background: #f7f9f8;
+      }
+      body {
+        display: grid;
+        min-height: 100vh;
+        margin: 0;
+        place-items: center;
+        -webkit-font-smoothing: antialiased;
+      }
+      main {
+        display: flex;
+        max-width: 560px;
+        padding: 40px;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        text-align: center;
+      }
+      h1 {
+        margin: 6px 0 0;
+        font-size: 17px;
+        font-weight: 650;
+      }
+      p {
+        margin: 0;
+        color: #52645c;
+        font-size: 14px;
+        line-height: 1.6;
+        word-break: break-all;
+      }
+      .spinner {
+        width: 30px;
+        height: 30px;
+        border: 3px solid #dce2df;
+        border-top-color: #21754c;
+        border-radius: 50%;
+        animation: spin 800ms linear infinite;
+      }
+      .warning {
+        color: #d9822b;
+      }
+      button {
+        min-height: 44px;
+        margin-top: 8px;
+        padding: 0 28px;
+        color: #ffffff;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 640;
+        background: #21754c;
+        border: 0;
+        border-radius: 9px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #17623f;
+      }
+      button:focus-visible {
+        outline: 3px solid rgba(42, 138, 91, 0.24);
+        outline-offset: 2px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="connecting">
+      <div class="spinner" role="progressbar" aria-label="正在连接"></div>
+      <h1>正在准备服务控制台…</h1>
+      <p>首次启动可能需要几秒钟。</p>
+    </main>
+    <main id="failed" hidden>
+      <svg class="warning" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+        <path d="M12 9v4" />
+        <path d="M12 17h.01" />
+      </svg>
+      <h1>控制台未能启动</h1>
+      <p id="message"></p>
+      <button id="retry" type="button">重试</button>
+    </main>
+    <script>
+      const params = new URLSearchParams(location.search);
+      if (params.get('state') === 'failed') {
+        document.getElementById('connecting').hidden = true;
+        document.getElementById('failed').hidden = false;
+        document.getElementById('message').textContent = params.get('message') || '';
+        const retry = document.getElementById('retry');
+        retry.addEventListener('click', () => window.machineCabin?.retry());
+        retry.focus();
+      }
+    </script>
+  </body>
+</html>

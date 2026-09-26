@@ -1,0 +1,38 @@
+# Windows 版打包配置，由 script/package_windows.mjs 调用（npm run dist:win）。
+appId: com.xxy.machinecabin
+productName: 机舱
+copyright: Copyright © 2026 xxy
+directories:
+  output: build/windows
+  buildResources: desktop/resources
+# 服务端以 ESM 运行，并会用 Electron 自身启动 server/lib/runner.js，直接以普通文件分发最稳妥。
+asar: false
+npmRebuild: false
+files:
+  - package.json
+  - desktop/**
+  - "!desktop/resources/**"
+  - dist/**
+  - server/**
+  - "!server/**/*.test.js"
+electronLanguages:
+  - zh-CN
+  - en-US
+win:
+  executableName: MachineCabin
+  icon: desktop/resources/icon.png
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  shortcutName: 机舱
+  uninstallDisplayName: 机舱
+  artifactName: MachineCabin-Setup-${version}-${arch}.${ext}
+  installerLanguages:
+    - zh_CN
+  language: "2052"
+  deleteAppDataOnUninstall: false

@@ -1,5 +1,6 @@
 import { FolderSearch, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { directoryPlaceholder } from '../platform';
 
 const emptyForm = {
   name: '',
@@ -90,7 +91,7 @@ export function ServiceDrawer({ open, service, onClose, onSave, saving }) {
               <span>项目目录</span>
               <div className="input-with-icon">
                 <FolderSearch size={18} />
-                <input value={form.directory} onChange={setField('directory')} placeholder="/Users/me/Projects/order-api" />
+                <input value={form.directory} onChange={setField('directory')} placeholder={directoryPlaceholder} />
               </div>
               <small>请输入项目的绝对路径；保存时会检查目录是否存在。</small>
             </label>

@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>机舱 · 本地服务控制台</title>
-  <meta name="description" content="机舱是一款 macOS 本地开发服务控制台：集中记录每个服务的目录、端口与启动命令，一键启动、停止、查看实时日志，并能自动扫描 Node.js、Python、Go、Rust 与 Swift 项目。">
+  <meta name="description" content="机舱是一款适用于 macOS 与 Windows 的本地开发服务控制台：集中记录每个服务的目录、端口与启动命令，一键启动、停止、查看实时日志，并能自动扫描 Node.js、Python、Go、Rust 与 Swift 项目。">
   <meta name="theme-color" content="#080d0b">
   <meta property="og:type" content="website">
   <meta property="og:title" content="机舱 · 本地服务，一处掌控">
-  <meta property="og:description" content="集中管理本机开发服务：一键启停、实时日志、自动扫描项目。适用于 macOS。">
+  <meta property="og:description" content="集中管理本机开发服务：一键启停、实时日志、自动扫描项目。适用于 macOS 与 Windows。">
   <meta property="og:image" content="assets/icon-512.png">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
@@ -20,6 +20,7 @@
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <symbol id="i-apple" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></symbol>
+      <symbol id="i-windows" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M3 5.3 10.4 4.2v7.1H3zm8.4-1.2L21 2.7v8.6h-9.6zM3 12.7h7.4v7.1L3 18.7zm8.4 0H21v8.6l-9.6-1.4z"/></symbol>
       <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3.97.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
       <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
       <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
@@ -81,15 +82,19 @@
       <div class="container hero-inner">
         <a class="pill reveal" href="#download">
           <span class="pill-dot"></span>
-          <span>v<span data-bind="version">1.1.0</span> 已发布 · 适用于 macOS</span>
+          <span>v<span data-bind="version">1.1.0</span> 已发布 · 适用于 macOS 与 Windows</span>
           <svg class="i"><use href="#i-arrow"/></svg>
         </a>
         <h1 class="reveal">本地服务，<br><span class="grad">一处掌控。</span></h1>
         <p class="lead reveal">机舱把本机的每一个开发服务收进一张表：目录、端口、启动命令和实时状态一目了然。扫描、启动、停止、看日志，都只要点一下。</p>
         <div class="cta reveal">
-          <a class="btn btn-lg btn-primary" data-link="download" href="downloads/">
+          <a class="btn btn-lg btn-primary" data-link="download" data-platform="mac" href="downloads/">
             <svg class="i"><use href="#i-apple"/></svg>
             下载 macOS 版
+          </a>
+          <a class="btn btn-lg btn-ghost" data-link="download-win" data-platform="windows" href="#download">
+            <svg class="i"><use href="#i-windows"/></svg>
+            下载 Windows 版
           </a>
           <a class="btn btn-lg btn-ghost" data-link="releases" href="https://github.com/" target="_blank" rel="noopener">
             <svg class="i"><use href="#i-github"/></svg>
@@ -97,7 +102,7 @@
           </a>
         </div>
         <p class="hero-meta reveal">
-          <span>免费下载</span><span>macOS 13+</span><span>Apple Silicon</span><span>需要 Node.js 18+</span>
+          <span>免费下载</span><span>macOS 13+（Apple Silicon）</span><span>Windows 10 / 11（64 位）</span>
         </p>
       </div>
 
@@ -343,18 +348,18 @@
           <article class="card span-2 reveal">
             <div class="visual v-keys" aria-hidden="true">
               <div class="shortcut">
-                <span class="keys"><kbd>⇧</kbd><kbd>⌘</kbd><kbd>R</kbd></span>
+                <span class="keys"><kbd>⇧</kbd><kbd data-win="Ctrl">⌘</kbd><kbd>R</kbd></span>
                 <span>重新连接控制台</span>
               </div>
               <div class="shortcut">
-                <span class="keys"><kbd>⇧</kbd><kbd>⌘</kbd><kbd>O</kbd></span>
+                <span class="keys"><kbd>⇧</kbd><kbd data-win="Ctrl">⌘</kbd><kbd>O</kbd></span>
                 <span>在默认浏览器中打开</span>
               </div>
             </div>
             <div class="card-body">
               <span class="card-icon"><svg class="i"><use href="#i-window"/></svg></span>
-              <h3>原生 macOS 应用</h3>
-              <p>用 SwiftUI 打造，可以从「应用程序」或启动台直接打开。App 会自己启动内置的控制台服务，不需要在终端里手动运行任何命令。</p>
+              <h3>macOS 与 Windows 桌面应用</h3>
+              <p>macOS 版用 SwiftUI 打造，Windows 版提供安装程序和开始菜单快捷方式。App 会自己启动内置的控制台服务，不需要在终端里手动运行任何命令。</p>
             </div>
           </article>
         </div>
@@ -407,7 +412,7 @@
             </li>
             <li>
               <span class="card-icon"><svg class="i"><use href="#i-drive"/></svg></span>
-              <div><h3>配置保存在本地</h3><p>服务列表和运行日志都存放在 <code>~/Library/<wbr>Application Support/<wbr>机舱</code>。</p></div>
+              <div><h3>配置保存在本地</h3><p>服务列表和运行日志都存放在本机：macOS 在 <code>~/Library/<wbr>Application Support/<wbr>机舱</code>，Windows 在 <code>%APPDATA%\<wbr>机舱</code>。</p></div>
             </li>
             <li>
               <span class="card-icon"><svg class="i"><use href="#i-folder-check"/></svg></span>
@@ -425,16 +430,16 @@
         <div class="section-head center reveal">
           <img class="download-icon" src="assets/icon-512.png" alt="机舱 App 图标" width="112" height="112">
           <h2>下载机舱</h2>
-          <p class="section-lead">两个渠道提供的是同一个安装包，选网络更顺畅的那个就好。</p>
+          <p class="section-lead">官网直链和 GitHub Releases 提供的是同样的安装包，选网络更顺畅的那个就好。</p>
         </div>
 
         <div class="dl-grid">
-          <div class="dl-card primary reveal">
+          <div class="dl-card primary reveal" data-platform-card="mac">
             <div class="dl-top">
-              <span class="dl-badge">国内推荐</span>
+              <span class="dl-badge">官网直链</span>
               <span class="card-icon"><svg class="i"><use href="#i-apple"/></svg></span>
             </div>
-            <h3>官网直接下载</h3>
+            <h3>macOS 版</h3>
             <p>从官网服务器下载 DMG 安装包，国内网络更快更稳定。</p>
             <dl class="dl-meta">
               <div><dt>版本</dt><dd>v<span data-bind="version">1.1.0</span></dd></div>
@@ -443,11 +448,32 @@
               <div data-show="size" hidden><dt>大小</dt><dd data-bind="size"></dd></div>
               <div class="full" data-show="sha256" hidden><dt>SHA-256</dt><dd><code data-bind="sha256"></code></dd></div>
             </dl>
-            <a class="btn btn-lg btn-primary btn-block" data-link="download" href="downloads/">
+            <a class="btn btn-lg btn-primary btn-block" data-link="download" data-platform="mac" href="downloads/">
               <svg class="i"><use href="#i-download"/></svg>
               下载 DMG 安装包
             </a>
             <p class="dl-foot">直链下载，无需注册登录</p>
+          </div>
+
+          <div class="dl-card reveal" data-platform-card="windows">
+            <div class="dl-top">
+              <span class="dl-badge">官网直链</span>
+              <span class="card-icon"><svg class="i"><use href="#i-windows"/></svg></span>
+            </div>
+            <h3>Windows 版</h3>
+            <p>EXE 安装程序，自带运行环境，不需要另外安装 Node.js。</p>
+            <dl class="dl-meta">
+              <div><dt>版本</dt><dd>v<span data-bind="win-version">1.1.0</span></dd></div>
+              <div><dt>格式</dt><dd>EXE</dd></div>
+              <div><dt>架构</dt><dd data-bind="win-arch">x64</dd></div>
+              <div data-show="win-size" hidden><dt>大小</dt><dd data-bind="win-size"></dd></div>
+              <div class="full" data-show="win-sha256" hidden><dt>SHA-256</dt><dd><code data-bind="win-sha256"></code></dd></div>
+            </dl>
+            <a class="btn btn-lg btn-ghost btn-block" data-link="download-win" data-platform="windows" href="#download">
+              <svg class="i"><use href="#i-download"/></svg>
+              下载 EXE 安装程序
+            </a>
+            <p class="dl-foot">Windows 10 / 11 · 64 位</p>
           </div>
 
           <div class="dl-card reveal">
@@ -456,7 +482,7 @@
               <span class="card-icon"><svg class="i"><use href="#i-github"/></svg></span>
             </div>
             <h3>GitHub Releases</h3>
-            <p>在 GitHub 上下载同一个安装包，还能查看更新日志、历史版本和完整源码。</p>
+            <p>在 GitHub 上下载同样的安装包，还能查看更新日志、历史版本和完整源码。</p>
             <dl class="dl-meta">
               <div><dt>更新日志</dt><dd>完整</dd></div>
               <div><dt>历史版本</dt><dd>全部保留</dd></div>
@@ -470,9 +496,9 @@
           </div>
         </div>
 
-        <div class="install reveal">
+        <div class="install reveal" data-platform-install="mac">
           <div class="install-col">
-            <h3>系统要求</h3>
+            <h3>macOS 系统要求</h3>
             <ul class="req">
               <li><svg class="i"><use href="#i-laptop"/></svg>macOS 13 Ventura 或更高版本</li>
               <li><svg class="i"><use href="#i-cpu"/></svg>Apple Silicon 芯片（M 系列）</li>
@@ -480,7 +506,7 @@
             </ul>
           </div>
           <div class="install-col">
-            <h3>安装步骤</h3>
+            <h3>macOS 安装步骤</h3>
             <ol class="how-install">
               <li>打开 DMG，把「机舱」拖进「应用程序」文件夹。</li>
               <li>机舱目前还没有经过 Apple 公证。第一次打开如果被系统拦下，请到「系统设置 → 隐私与安全性」，点击「仍要打开」。</li>
@@ -493,6 +519,25 @@
                   </button>
                 </div>
               </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="install reveal" data-platform-install="windows">
+          <div class="install-col">
+            <h3>Windows 系统要求</h3>
+            <ul class="req">
+              <li><svg class="i"><use href="#i-laptop"/></svg>Windows 10 或 Windows 11</li>
+              <li><svg class="i"><use href="#i-cpu"/></svg>64 位（x64）处理器</li>
+              <li><svg class="i"><use href="#i-hexagon"/></svg>已内置运行环境，无需安装 Node.js</li>
+            </ul>
+          </div>
+          <div class="install-col">
+            <h3>Windows 安装步骤</h3>
+            <ol class="how-install">
+              <li>运行下载好的安装程序，按提示完成安装。默认安装在当前用户下，不需要管理员权限。</li>
+              <li>机舱目前还没有代码签名。如果 Windows 提示“已保护你的电脑”，点击「更多信息」，再点击「仍要运行」。</li>
+              <li>从开始菜单或桌面打开「机舱」。关闭窗口后，由机舱启动的服务会继续在后台运行，下次打开时会自动识别。</li>
             </ol>
           </div>
         </div>
@@ -513,8 +558,8 @@
             <p>不会。控制台只监听 127.0.0.1，服务配置和运行日志都保存在本机，机舱不需要账号，也不连接任何云端服务。</p>
           </details>
           <details class="reveal">
-            <summary>为什么需要安装 Node.js？<svg class="i"><use href="#i-plus"/></svg></summary>
-            <p>机舱内置的控制台服务基于 Node.js 运行。App 会依次在 <code>/opt/homebrew/bin</code>、<code>/usr/local/bin</code>、<code>/usr/bin</code> 中查找 <code>node</code>，找不到时会提示你先安装。用 Homebrew 安装最方便：<code>brew install node</code>。</p>
+            <summary>为什么 macOS 版需要安装 Node.js？<svg class="i"><use href="#i-plus"/></svg></summary>
+            <p>机舱内置的控制台服务基于 Node.js 运行。Windows 版已经自带运行环境，不需要另外安装；macOS 版则会依次在 <code>/opt/homebrew/bin</code>、<code>/usr/local/bin</code>、<code>/usr/bin</code> 中查找 <code>node</code>，找不到时会提示你先安装。用 Homebrew 安装最方便：<code>brew install node</code>。</p>
           </details>
           <details class="reveal">
             <summary>支持 Intel 芯片的 Mac 吗？<svg class="i"><use href="#i-plus"/></svg></summary>
@@ -522,7 +567,7 @@
           </details>
           <details class="reveal">
             <summary>能停止不是机舱启动的进程吗？<svg class="i"><use href="#i-plus"/></svg></summary>
-            <p>可以，但有限制：只有当进程的工作目录位于该服务的项目目录内时才允许停止。这样可以避免误杀恰好占用同一端口的其他程序。</p>
+            <p>可以，但有限制：只有当进程的工作目录位于该服务的项目目录内时才允许停止（Windows 上读不到其他进程的工作目录，改为检查进程的命令行是否指向项目目录）。这样可以避免误杀恰好占用同一端口的其他程序。</p>
           </details>
           <details class="reveal">
             <summary>删除服务会删除我的项目吗？<svg class="i"><use href="#i-plus"/></svg></summary>
@@ -530,11 +575,11 @@
           </details>
           <details class="reveal">
             <summary>不想装 App，可以直接在浏览器里用吗？<svg class="i"><use href="#i-plus"/></svg></summary>
-            <p>可以。克隆源码后依次运行 <code>npm install</code>、<code>npm run build</code>、<code>npm start</code>，然后访问 <code>http://127.0.0.1:49152</code>。在 App 里也可以按 <kbd>⇧</kbd><kbd>⌘</kbd><kbd>O</kbd> 用浏览器打开控制台。</p>
+            <p>可以。克隆源码后依次运行 <code>npm install</code>、<code>npm run build</code>、<code>npm start</code>，然后访问 <code>http://127.0.0.1:49152</code>。在 App 里也可以按 <kbd>⇧</kbd><kbd data-win="Ctrl">⌘</kbd><kbd>O</kbd> 用浏览器打开控制台。</p>
           </details>
           <details class="reveal">
             <summary>配置文件保存在哪里？<svg class="i"><use href="#i-plus"/></svg></summary>
-            <p>App 的数据保存在 <code>~/Library/<wbr>Application Support/<wbr>机舱/<wbr>services.json</code>。卸载时把「应用程序」里的机舱和这个目录一起删除即可。</p>
+            <p>macOS 版的数据保存在 <code>~/Library/<wbr>Application Support/<wbr>机舱/<wbr>services.json</code>，卸载时把「应用程序」里的机舱和这个目录一起删除即可。Windows 版保存在 <code>%APPDATA%\<wbr>机舱\<wbr>services.json</code>，在「设置 → 应用」中卸载机舱后，可以再手动删除这个目录。</p>
           </details>
         </div>
       </div>

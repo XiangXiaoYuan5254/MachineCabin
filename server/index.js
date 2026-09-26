@@ -1,15 +1,12 @@
-import { execFile as execFileCallback } from 'node:child_process';
 import crypto from 'node:crypto';
 import { stat } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { promisify } from 'node:util';
 import express from 'express';
 import { discoverServices } from './lib/discovery.js';
-import { getRuntime, readLogs, startService, stopService } from './lib/process-manager.js';
+import { getRuntime, openFolder, readLogs, startService, stopService } from './lib/process-manager.js';
 import { dataFile, expandPath, projectRoot, readStore, updateStore } from './lib/store.js';
 
-const execFile = promisify(execFileCallback);
 const app = express();
 const port = Number(process.env.CONSOLE_PORT || 49152);
 const host = process.env.CONSOLE_HOST || '127.0.0.1';
@@ -132,8 +129,7 @@ app.get('/api/services/:id/logs', async (request, response) => {
 
 app.post('/api/services/:id/open-folder', async (request, response) => {
   const service = await findService(request.params.id);
-  if (os.platform() !== 'darwin') throw httpError(501, '当前系统暂不支持从控制台打开目录。');
-  await execFile('open', [service.directory]);
+  await openFolder(service.directory);
   response.json({ ok: true });
 });
 

@@ -19,21 +19,10 @@
     return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
   }
 
-  function applyRelease(release) {
-    const githubUrl = `https://github.com/${config.githubRepo}`;
-    const links = {
-      repo: githubUrl,
-      releases: `${githubUrl}/releases/latest`,
-      issues: `${githubUrl}/issues`,
-      download: `${config.downloadBase || 'downloads/'}${release.file}`,
-    };
-    const values = {
-      version: release.version,
-      arch: archLabels[release.arch] || release.arch || 'Apple Silicon',
-      size: formatSize(release.size),
-      sha256: release.sha256 || '',
-    };
+  const githubUrl = `https://github.com/${config.githubRepo}`;
+  const downloadBase = config.downloadBase || 'downloads/';
 
+  function bind(links, values) {
     $$('[data-link]').forEach((link) => {
       const href = links[link.dataset.link];
       if (href) link.href = href;
@@ -43,7 +32,33 @@
       if (value) node.textContent = value;
     });
     $$('[data-show]').forEach((node) => {
-      node.hidden = !values[node.dataset.show];
+      if (node.dataset.show in values) node.hidden = !values[node.dataset.show];
+    });
+  }
+
+  function applyRelease(release) {
+    bind({
+      repo: githubUrl,
+      releases: `${githubUrl}/releases/latest`,
+      issues: `${githubUrl}/issues`,
+      download: `${downloadBase}${release.file}`,
+    }, {
+      version: release.version,
+      arch: archLabels[release.arch] || release.arch || 'Apple Silicon',
+      size: formatSize(release.size),
+      sha256: release.sha256 || '',
+    });
+  }
+
+  function applyWindowsRelease(release, available) {
+    bind({
+      // 安装包体积较大，没有随官网一起部署时改为跳转到 GitHub Releases。
+      'download-win': available ? `${downloadBase}${release.file}` : `${githubUrl}/releases/latest`,
+    }, {
+      'win-version': release.version,
+      'win-arch': release.arch || 'x64',
+      'win-size': available ? formatSize(release.size) : '',
+      'win-sha256': available ? release.sha256 || '' : '',
     });
   }
 
@@ -55,6 +70,40 @@
       if (release?.file) applyRelease({ ...fallback, ...release });
     })
     .catch(() => {});
+
+  const windowsFallback = config.windowsFallback || { version: '1.1.0', file: 'MachineCabin-Setup-1.1.0-x64.exe', arch: 'x64' };
+  applyWindowsRelease(windowsFallback, false);
+  fetch('downloads/latest-windows.json', { cache: 'no-store' })
+    .then((response) => (response.ok ? response.json() : null))
+    .then(async (release) => {
+      if (!release?.file) return;
+      const merged = { ...windowsFallback, ...release };
+      const installer = await fetch(`${downloadBase}${merged.file}`, { method: 'HEAD' }).catch(() => null);
+      applyWindowsRelease(merged, Boolean(installer?.ok));
+    })
+    .catch(() => {});
+
+  /* ---------- 按访客的系统突出对应的下载 ---------- */
+
+  if (/Windows/i.test(navigator.userAgent)) {
+    $$('[data-platform]').forEach((button) => {
+      const preferred = button.dataset.platform === 'windows';
+      button.classList.toggle('btn-primary', preferred);
+      button.classList.toggle('btn-ghost', !preferred);
+    });
+    $$('[data-platform-card]').forEach((card) => {
+      card.classList.toggle('primary', card.dataset.platformCard === 'windows');
+    });
+    const heroWindows = $('.cta [data-platform="windows"]');
+    heroWindows.parentElement.prepend(heroWindows);
+    const windowsCard = $('[data-platform-card="windows"]');
+    windowsCard.parentElement.prepend(windowsCard);
+    const windowsInstall = $('[data-platform-install="windows"]');
+    windowsInstall.parentElement.insertBefore(windowsInstall, $('[data-platform-install="mac"]'));
+    $$('kbd[data-win]').forEach((key) => {
+      key.textContent = key.dataset.win;
+    });
+  }
 
   $('#year').textContent = new Date().getFullYear();
 

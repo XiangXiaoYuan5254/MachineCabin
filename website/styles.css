@@ -1581,9 +1581,9 @@ kbd {
 
 .dl-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
-  max-width: 980px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
@@ -1708,7 +1708,7 @@ kbd {
   display: grid;
   grid-template-columns: 1fr 1.6fr;
   gap: 20px;
-  max-width: 980px;
+  max-width: 1180px;
   margin: 20px auto 0;
 }
 
@@ -2017,6 +2017,16 @@ main > .section:last-child {
 
   .faq-wrap .section-head {
     position: static;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dl-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dl-grid .dl-card:last-child {
+    grid-column: 1 / -1;
   }
 }
 

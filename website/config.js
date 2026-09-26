@@ -14,4 +14,12 @@ window.SITE_CONFIG = {
     file: 'MachineCabin-1.1.0.dmg',
     arch: 'arm64',
   },
+
+  // Windows 版的默认信息，对应 downloads/latest-windows.json（由 npm run dist:win 生成）。
+  // 官网上没有部署 EXE 安装包时，“下载 Windows 版”会自动跳转到 GitHub Releases。
+  windowsFallback: {
+    version: '1.1.0',
+    file: 'MachineCabin-Setup-1.1.0-x64.exe',
+    arch: 'x64',
+  },
 };

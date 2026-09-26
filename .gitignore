@@ -5,3 +5,4 @@ build/
 .vbcoding/
 .DS_Store
 npm-debug.log*
+website/downloads/*.exe

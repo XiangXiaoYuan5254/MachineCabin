@@ -1,6 +1,7 @@
 import { Copy, ExternalLink, FolderOpen, MoreHorizontal, Pencil, Play, Square, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { openInFileManager } from '../platform';
 
 function RowMenu({ service, onEdit, onDelete, onOpenFolder }) {
   const [open, setOpen] = useState(false);
@@ -65,7 +66,7 @@ function RowMenu({ service, onEdit, onDelete, onOpenFolder }) {
           onClick={(event) => event.stopPropagation()}
         >
           <button type="button" role="menuitem" onClick={() => runAndClose(onEdit)}><Pencil size={15} /> 编辑服务</button>
-          <button type="button" role="menuitem" onClick={() => runAndClose(onOpenFolder)}><FolderOpen size={15} /> 在 Finder 中打开</button>
+          <button type="button" role="menuitem" onClick={() => runAndClose(onOpenFolder)}><FolderOpen size={15} /> {openInFileManager}</button>
           <button type="button" role="menuitem" className="danger" onClick={() => runAndClose(onDelete)}><Trash2 size={15} /> 删除记录</button>
         </div>,
         document.body,
@@ -103,7 +104,7 @@ function DirectoryValue({ service, onOpenFolder, onCopy }) {
       <button
         type="button"
         className="directory-open-button"
-        aria-label={`在 Finder 中打开项目目录：${service.directory}`}
+        aria-label={`${openInFileManager}项目目录：${service.directory}`}
         onClick={(event) => {
           event.stopPropagation();
           onOpenFolder(service);

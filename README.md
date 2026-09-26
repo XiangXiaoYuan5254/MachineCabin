@@ -24,6 +24,37 @@
 
 项目同时提供 `./script/build_and_run.sh` 作为统一的构建、打包和运行入口；Codex 的 Run 按钮也连接到这个脚本。
 
+## Windows App
+
+Windows 版基于 Electron，源码在 `desktop/`，自带运行环境，用户不需要安装 Node.js。它和 macOS 版共用同一套服务端与界面，数据保存在：
+
+```text
+%APPDATA%\机舱\services.json
+```
+
+在 macOS 或 Windows 上都可以打包 Windows 安装程序（NSIS，x64）：
+
+```bash
+npm run dist:win
+```
+
+安装程序输出到 `build/windows/MachineCabin-Setup-<版本>-x64.exe`，同时会复制到 `website/downloads/` 并生成 `latest-windows.json`。版本号取自 `package.json` 的 `version`，发版时请和 `macapp/Info.plist` 保持一致。
+
+本地调试 Windows 版的外壳（在 macOS 上也能运行）：
+
+```bash
+npm run desktop
+```
+
+Windows 版的几个行为差异：
+
+- 服务通过隐藏的控制台运行，不会弹出命令行窗口；关闭机舱后服务继续运行，下次打开会自动识别。
+- 停止服务时会结束整个进程树（`taskkill /T /F`）。
+- Windows 读不到其他进程的工作目录，所以对不是由机舱启动的进程，改为检查它的命令行或可执行文件是否位于服务目录内，才允许停止。
+- 默认端口 49152 被占用时，App 会自动换一个空闲端口。
+
+`.github/workflows/windows.yml` 会在 GitHub 的 Windows 机器上运行测试、打包安装程序，并对安装后的 App 做端到端冒烟测试（`script/smoke_windows.mjs`），安装程序可以在 Actions 的构建产物里下载。
+
 ## 启动
 
 在 macOS 上可以直接双击 `start-console.command`。第一次启动会安装依赖并构建页面，随后自动打开：
@@ -52,7 +83,7 @@ npm run dev
 
 - 点击“扫描服务”：在设置的扫描目录中查找 Node.js、Python、Go、Rust 与 Swift 项目，并推断启动命令和常见端口。
 - 点击“添加服务”：手动填写服务名称、绝对路径、端口和启动命令。
-- 点击“启动/停止”：从项目目录执行启动命令，或安全停止由控制台启动的进程。
+- 点击“启动/停止”：从项目目录执行启动命令，或安全停止由控制台启动的进程。启动命令在 macOS 上由登录 shell 执行，在 Windows 上由 `cmd.exe` 执行。
 - 点击服务行：在下方查看持续刷新的运行日志。
 - 在“设置”中：每行填写一个扫描根目录。
 
@@ -78,8 +109,9 @@ npm run dev
    ```
 
    `package_dmg.sh` 会生成 `build/release/MachineCabin-<版本>.dmg`（不包含本机的服务列表），并把它和 `latest.json` 同步到 `website/downloads/`，官网上的版本号、大小和 SHA-256 会自动更新。
-3. 在 GitHub 新建 Release，上传同一个 DMG 文件。
-4. 部署 `website/` 目录。如果想把安装包放到 CDN / OSS，把 `downloadBase` 改成对应地址即可。
+3. 运行 `npm run dist:win` 打包 Windows 安装程序，它会同步到 `website/downloads/` 并更新 `latest-windows.json`。安装程序约 100 MB，超过 GitHub 单个文件的上限，所以已在 `.gitignore` 中排除；部署官网时需要连同本地的 `website/downloads/` 一起上传。如果官网上没有这个文件，“下载 Windows 版”会自动跳转到 GitHub Releases。
+4. 在 GitHub 新建 Release，上传同一个 DMG 和 EXE 文件。
+5. 部署 `website/` 目录。如果想把安装包放到 CDN / OSS，把 `downloadBase` 改成对应地址即可。
 
 本地预览官网：
 

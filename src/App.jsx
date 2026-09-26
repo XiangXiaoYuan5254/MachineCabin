@@ -7,6 +7,7 @@ import { ServiceTable } from './components/ServiceTable';
 import { ServiceToolbar } from './components/ServiceToolbar';
 import { SettingsView } from './components/SettingsView';
 import { Sidebar } from './components/Sidebar';
+import { openInFileManager, platformName } from './platform';
 
 function parseEnv(text) {
   return Object.fromEntries(
@@ -190,7 +191,7 @@ export default function App() {
       const response = await fetch(`/api/services/${service.id}/open-folder`, { method: 'POST' });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
-      showToast('已在 Finder 中打开目录');
+      showToast(`已${openInFileManager}目录`);
     } catch (error) {
       showToast(error.message);
     }
@@ -304,7 +305,7 @@ export default function App() {
 
       <div className="status-bar">
         <span><span className={`connection-dot ${connected ? '' : 'offline'}`} /> {connected ? '本机服务控制已就绪' : '服务端未连接'}</span>
-        <span>{meta?.platform || '本机'} · 每 {Math.round((meta?.settings?.refreshInterval || 5000) / 1000)} 秒刷新状态</span>
+        <span>{meta ? platformName(meta.platform) : '本机'} · 每 {Math.round((meta?.settings?.refreshInterval || 5000) / 1000)} 秒刷新状态</span>
       </div>
 
       <ServiceDrawer

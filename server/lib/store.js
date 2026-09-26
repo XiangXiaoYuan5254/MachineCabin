@@ -14,7 +14,7 @@ const initialState = {
   version: 1,
   services: [],
   settings: {
-    discoveryRoots: [path.dirname(projectRoot)],
+    discoveryRoots: [process.env.VBCODING_DISCOVERY_ROOT || path.dirname(projectRoot)],
     refreshInterval: 5000,
   },
 };
@@ -24,7 +24,7 @@ let updateQueue = Promise.resolve();
 export function expandPath(value) {
   if (!value) return '';
   if (value === '~') return os.homedir();
-  if (value.startsWith('~/')) return path.join(os.homedir(), value.slice(2));
+  if (value.startsWith('~/') || value.startsWith('~\\')) return path.join(os.homedir(), value.slice(2));
   return path.resolve(value);
 }
 
@@ -54,7 +54,16 @@ async function writeStore(state) {
   await mkdir(dataDirectory, { recursive: true });
   const temporaryFile = `${dataFile}.${process.pid}.tmp`;
   await writeFile(temporaryFile, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
-  await rename(temporaryFile, dataFile);
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      await rename(temporaryFile, dataFile);
+      return;
+    } catch (error) {
+      // Windows 上杀毒软件或索引服务可能短暂占用目标文件，稍等后重试。
+      if (attempt >= 5 || !['EPERM', 'EACCES', 'EBUSY'].includes(error.code)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 60 * (attempt + 1)));
+    }
+  }
 }
 
 export async function updateStore(updater) {

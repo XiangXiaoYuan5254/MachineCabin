@@ -1,11 +1,10 @@
-import { execFile as execFileCallback, spawn } from 'node:child_process';
-import { closeSync, openSync } from 'node:fs';
 import { mkdir, open, stat } from 'node:fs/promises';
 import path from 'node:path';
-import { promisify } from 'node:util';
+import * as posix from './platform/posix.js';
+import * as win32 from './platform/win32.js';
 import { dataFile, updateStore } from './store.js';
 
-const execFile = promisify(execFileCallback);
+const system = process.platform === 'win32' ? win32 : posix;
 const logsDirectory = path.join(path.dirname(dataFile), 'logs');
 
 function safeId(id) {
@@ -14,15 +13,6 @@ function safeId(id) {
 
 function logPath(id) {
   return path.join(logsDirectory, `${safeId(id)}.log`);
-}
-
-async function commandOutput(command, args) {
-  try {
-    const { stdout } = await execFile(command, args, { timeout: 2500, encoding: 'utf8' });
-    return stdout.trim();
-  } catch {
-    return '';
-  }
 }
 
 async function pidExists(pid) {
@@ -35,46 +25,24 @@ async function pidExists(pid) {
   }
 }
 
-async function pidSignature(pid) {
-  return commandOutput('ps', ['-p', String(pid), '-o', 'lstart=']);
-}
-
-async function pidCwd(pid) {
-  const output = await commandOutput('lsof', ['-a', '-p', String(pid), '-d', 'cwd', '-Fn']);
-  return output.split('\n').find((line) => line.startsWith('n'))?.slice(1) || '';
-}
-
-async function listeningPids(port) {
-  if (!port) return [];
-  const output = await commandOutput('lsof', ['-nP', `-iTCP:${port}`, '-sTCP:LISTEN', '-t']);
-  return [...new Set(output.split('\n').map(Number).filter((pid) => Number.isInteger(pid) && pid > 0))];
-}
-
 async function trackedProcessIsValid(service) {
   if (!(await pidExists(service.pid))) return false;
   if (!service.pidSignature) return false;
-  return (await pidSignature(service.pid)) === service.pidSignature;
-}
-
-function pathOwnsProcess(directory, cwd) {
-  if (!directory || !cwd) return false;
-  const relative = path.relative(path.resolve(directory), path.resolve(cwd));
-  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+  return (await system.processSignature(service.pid)) === service.pidSignature;
 }
 
 export async function getRuntime(service) {
   const [tracked, portPids] = await Promise.all([
     trackedProcessIsValid(service),
-    listeningPids(service.port),
+    system.listeningPids(service.port),
   ]);
   const detectedPid = tracked ? service.pid : portPids[0] || null;
-  const cwd = detectedPid ? await pidCwd(detectedPid) : '';
   const running = tracked || portPids.length > 0;
   return {
     status: running ? 'running' : 'stopped',
     pid: detectedPid,
     managed: tracked,
-    manageable: tracked || pathOwnsProcess(service.directory, cwd),
+    manageable: tracked || Boolean(detectedPid && await system.processBelongsTo(detectedPid, service.directory)),
     startedAt: tracked ? service.startedAt || null : null,
   };
 }
@@ -94,34 +62,30 @@ export async function startService(service) {
   if ((await getRuntime(service)).status === 'running') return getRuntime(service);
 
   await mkdir(logsDirectory, { recursive: true });
-  const descriptor = openSync(logPath(service.id), 'a');
-  const shell = process.env.SHELL || '/bin/zsh';
-  const child = spawn(shell, ['-lc', service.startCommand], {
+  const pid = system.launch({
+    command: service.startCommand,
     cwd: service.directory,
     env: { ...process.env, ...(service.env || {}) },
-    detached: true,
-    stdio: ['ignore', descriptor, descriptor],
+    logFile: logPath(service.id),
   });
-  child.unref();
-  closeSync(descriptor);
 
   await new Promise((resolve) => setTimeout(resolve, 80));
-  const signature = await pidSignature(child.pid);
+  const signature = await system.processSignature(pid);
   await updateStore((state) => {
     const target = state.services.find((item) => item.id === service.id);
     if (target) {
-      target.pid = child.pid;
+      target.pid = pid;
       target.pidSignature = signature;
       target.startedAt = new Date().toISOString();
     }
   });
 
   if (service.port) {
-    await waitFor(async () => (await listeningPids(service.port)).length > 0, 2600);
+    await waitFor(async () => (await system.listeningPids(service.port)).length > 0, 2600);
   } else {
     await new Promise((resolve) => setTimeout(resolve, 350));
   }
-  return getRuntime({ ...service, pid: child.pid, pidSignature: signature, startedAt: new Date().toISOString() });
+  return getRuntime({ ...service, pid, pidSignature: signature, startedAt: new Date().toISOString() });
 }
 
 export async function stopService(service) {
@@ -131,12 +95,7 @@ export async function stopService(service) {
     throw Object.assign(new Error('端口由其他目录的进程占用，已避免误停。请先确认服务配置。'), { status: 409 });
   }
 
-  try {
-    if (runtime.managed) process.kill(-runtime.pid, 'SIGTERM');
-    else process.kill(runtime.pid, 'SIGTERM');
-  } catch (error) {
-    if (error.code !== 'ESRCH') throw error;
-  }
+  await system.terminate(runtime.pid, { managed: runtime.managed });
 
   const stopped = await waitFor(async () => {
     const next = await getRuntime(service);
@@ -155,6 +114,10 @@ export async function stopService(service) {
     }
   });
   return { status: 'stopped', pid: null, managed: false, manageable: false, startedAt: null };
+}
+
+export function openFolder(directory) {
+  return system.openFolder(directory);
 }
 
 export async function readLogs(id, maxBytes = 96_000) {
