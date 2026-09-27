@@ -15,6 +15,8 @@ execSync('npm run build', { cwd: rootDirectory, stdio: 'inherit' });
 const artifacts = await build({
   projectDir: rootDirectory,
   targets: Platform.WINDOWS.createTarget('nsis', Arch.x64),
+  // electron-builder 在 CI 里默认会尝试发布到 GitHub Releases，这里只打包，发布由人工完成。
+  publish: 'never',
 });
 const installer = artifacts.find((file) => file.endsWith('.exe'));
 if (!installer) throw new Error('electron-builder 没有生成安装包。');
