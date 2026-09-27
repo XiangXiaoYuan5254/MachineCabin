@@ -5,4 +5,5 @@ build/
 .vbcoding/
 .DS_Store
 npm-debug.log*
-website/downloads/*.exe
+# 官网只保存在本地，不公开到 GitHub
+website/

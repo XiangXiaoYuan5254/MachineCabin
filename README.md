@@ -98,7 +98,7 @@ npm run dev
 
 ## 官网与发布
 
-官网是 `website/` 下的纯静态页面，不需要构建，可以直接部署到任意静态托管（Nginx、GitHub Pages、Vercel、Netlify、OSS 等）。
+官网是 `website/` 下的纯静态页面，只保存在本地，不提交到 Git（已在 `.gitignore` 中忽略）。它不需要构建，可以直接部署到任意静态托管（Nginx、GitHub Pages、Vercel、Netlify、OSS 等）。
 
 1. 在 `website/config.js` 中把 `githubRepo` 改成你的 GitHub 仓库（`用户名/仓库名`）。
 2. 构建 App 并打包 DMG：
@@ -108,8 +108,8 @@ npm run dev
    ./script/package_dmg.sh
    ```
 
-   `package_dmg.sh` 会生成 `build/release/MachineCabin-<版本>.dmg`（不包含本机的服务列表），并把它和 `latest.json` 同步到 `website/downloads/`，官网上的版本号、大小和 SHA-256 会自动更新。
-3. 运行 `npm run dist:win` 打包 Windows 安装程序，它会同步到 `website/downloads/` 并更新 `latest-windows.json`。安装程序约 100 MB，超过 GitHub 单个文件的上限，所以已在 `.gitignore` 中排除；部署官网时需要连同本地的 `website/downloads/` 一起上传。如果官网上没有这个文件，“下载 Windows 版”会自动跳转到 GitHub Releases。
+   `package_dmg.sh` 会生成 `build/release/MachineCabin-<版本>.dmg`（不包含本机的服务列表），并把它和 `latest.json` 同步到 `website/downloads/`，官网上的版本号和大小会自动更新。
+3. 运行 `npm run dist:win` 打包 Windows 安装程序，它会同步到 `website/downloads/` 并更新 `latest-windows.json`。如果官网上没有这个安装包，“下载 Windows 版”会自动跳转到 GitHub Releases。
 4. 在 GitHub 新建 Release，上传同一个 DMG 和 EXE 文件。
 5. 部署 `website/` 目录。如果想把安装包放到 CDN / OSS，把 `downloadBase` 改成对应地址即可。
 
