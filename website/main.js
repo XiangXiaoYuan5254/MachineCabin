@@ -46,7 +46,6 @@
       version: release.version,
       arch: archLabels[release.arch] || release.arch || 'Apple Silicon',
       size: formatSize(release.size),
-      sha256: release.sha256 || '',
     });
   }
 
@@ -58,7 +57,6 @@
       'win-version': release.version,
       'win-arch': release.arch || 'x64',
       'win-size': available ? formatSize(release.size) : '',
-      'win-sha256': available ? release.sha256 || '' : '',
     });
   }
 
