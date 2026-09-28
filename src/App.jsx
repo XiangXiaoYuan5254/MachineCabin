@@ -7,7 +7,9 @@ import { ServiceTable } from './components/ServiceTable';
 import { ServiceToolbar } from './components/ServiceToolbar';
 import { SettingsView } from './components/SettingsView';
 import { Sidebar } from './components/Sidebar';
+import { UpdateBanner } from './components/UpdateBanner';
 import { openInFileManager, platformName } from './platform';
+import { useUpdateCheck } from './useUpdateCheck';
 
 function parseEnv(text) {
   return Object.fromEntries(
@@ -58,7 +60,11 @@ export default function App() {
   const [saving, setSaving] = useState(false);
   const [discovering, setDiscovering] = useState(false);
   const [toast, setToast] = useState('');
+  const [dismissedUpdate, setDismissedUpdate] = useState('');
   const toastTimerRef = useRef(null);
+  const update = useUpdateCheck(meta);
+  // “忽略此版本”后不再提醒这个版本，但“设置”里仍然可以下载。
+  const updateNotice = update.available && update.latest.version !== meta?.settings?.skippedVersion;
 
   const showToast = useCallback((message) => {
     setToast(message);
@@ -212,6 +218,17 @@ export default function App() {
     showToast('设置已保存');
   };
 
+  const skipUpdate = async () => {
+    const { version } = update.latest;
+    try {
+      const result = await api.skipVersion(version);
+      setMeta((current) => ({ ...current, settings: result.settings }));
+      showToast(`不再提醒 v${version}，可以在“设置”中随时下载`);
+    } catch (error) {
+      showToast(error.message);
+    }
+  };
+
   const openAdd = () => {
     setEditingService(null);
     setDrawerOpen(true);
@@ -224,8 +241,22 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar active={activeSection} onChange={setActiveSection} connected={connected} />
+      <Sidebar
+        active={activeSection}
+        onChange={setActiveSection}
+        connected={connected}
+        version={meta?.version}
+        updateVersion={updateNotice ? update.latest.version : ''}
+      />
       <main className="main-content">
+        {updateNotice && dismissedUpdate !== update.latest.version ? (
+          <UpdateBanner
+            latest={update.latest}
+            currentVersion={update.currentVersion}
+            onSkip={skipUpdate}
+            onDismiss={() => setDismissedUpdate(update.latest.version)}
+          />
+        ) : null}
         {activeSection === 'services' ? (
           <div className="services-view">
             <header className="page-header">
@@ -300,7 +331,7 @@ export default function App() {
           </div>
         ) : null}
 
-        {activeSection === 'settings' ? <SettingsView meta={meta} onSave={saveSettings} /> : null}
+        {activeSection === 'settings' ? <SettingsView meta={meta} update={update} onSave={saveSettings} /> : null}
       </main>
 
       <div className="status-bar">

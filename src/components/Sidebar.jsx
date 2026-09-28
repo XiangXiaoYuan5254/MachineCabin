@@ -6,7 +6,7 @@ const navItems = [
   { id: 'settings', label: '设置', icon: Settings2 },
 ];
 
-export function Sidebar({ active, onChange, connected }) {
+export function Sidebar({ active, onChange, connected, version, updateVersion }) {
   return (
     <aside className="sidebar">
       <button className="brand" type="button" onClick={() => onChange('services')}>
@@ -31,7 +31,13 @@ export function Sidebar({ active, onChange, connected }) {
       <div className="sidebar-footer">
         <span className={`connection-dot ${connected ? '' : 'offline'}`} />
         <span>{connected ? '控制台已连接' : '等待连接'}</span>
-        <small>v1.0.0</small>
+        {updateVersion ? (
+          <button className="update-pill" type="button" onClick={() => onChange('settings')} title={`发现新版本 v${updateVersion}`}>
+            有更新
+          </button>
+        ) : (
+          <small>{version ? `v${version}` : ''}</small>
+        )}
       </div>
     </aside>
   );

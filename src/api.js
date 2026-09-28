@@ -25,4 +25,6 @@ export const api = {
   discover: () => request('/api/discover', { method: 'POST', body: '{}' }),
   updateSettings: (settings) =>
     request('/api/settings', { method: 'PUT', body: JSON.stringify(settings) }),
+  skipVersion: (version) =>
+    request('/api/settings/skipped-version', { method: 'PUT', body: JSON.stringify({ version }) }),
 };

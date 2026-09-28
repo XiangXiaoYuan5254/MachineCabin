@@ -6,6 +6,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "4173", "--bind", "127.0.0.1", "--directory", "website"],
       "port": 4173
+    },
+    {
+      "name": "console",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["CONSOLE_PORT=49200", "VBCODING_DATA_DIR=.vbcoding/preview", "node", "server/index.js"],
+      "port": 49200
     }
   ]
 }

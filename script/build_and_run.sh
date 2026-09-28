@@ -22,6 +22,15 @@ if [[ "$MODE" != "build" && "$MODE" != "--build" ]]; then
 fi
 
 cd "$ROOT_DIR"
+
+# App 用 package.json 的版本号检查更新，Info.plist 必须和它一致，否则会误报或漏报新版本。
+PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+PLIST_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$ROOT_DIR/macapp/Info.plist")"
+if [[ "$PACKAGE_VERSION" != "$PLIST_VERSION" ]]; then
+  echo "版本号不一致：package.json 是 $PACKAGE_VERSION，macapp/Info.plist 是 $PLIST_VERSION，请改成一致后再构建。" >&2
+  exit 1
+fi
+
 npm run build
 swift build -c release
 BUILD_BINARY="$(swift build -c release --show-bin-path)/$APP_NAME"

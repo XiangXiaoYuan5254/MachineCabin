@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { stat } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import express from 'express';
@@ -10,6 +10,8 @@ import { dataFile, expandPath, projectRoot, readStore, updateStore } from './lib
 const app = express();
 const port = Number(process.env.CONSOLE_PORT || 49152);
 const host = process.env.CONSOLE_HOST || '127.0.0.1';
+// macOS 版的 Info.plist 和 Windows 安装包都以 package.json 的版本号为准，界面用它判断是否有新版本。
+const { version: appVersion } = JSON.parse(await readFile(path.join(projectRoot, 'package.json'), 'utf8'));
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '1mb' }));
@@ -56,6 +58,7 @@ async function serializeService(service) {
 app.get('/api/meta', async (_request, response) => {
   const state = await readStore();
   response.json({
+    version: appVersion,
     platform: os.platform(),
     arch: os.arch(),
     hostname: os.hostname(),
@@ -169,6 +172,15 @@ app.put('/api/settings', async (request, response) => {
   if (invalid.length) throw httpError(400, `这些扫描目录不存在：${invalid.join('、')}`);
   const settings = await updateStore((state) => {
     state.settings = { ...state.settings, discoveryRoots };
+    return state.settings;
+  });
+  response.json({ settings });
+});
+
+app.put('/api/settings/skipped-version', async (request, response) => {
+  const skippedVersion = String(request.body.version || '').trim();
+  const settings = await updateStore((state) => {
+    state.settings = { ...state.settings, skippedVersion };
     return state.settings;
   });
   response.json({ settings });

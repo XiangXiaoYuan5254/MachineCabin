@@ -1,13 +1,34 @@
-import { Save } from 'lucide-react';
+import { Download, RefreshCw, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export function SettingsView({ meta, onSave }) {
+function formatDate(value) {
+  return value ? new Date(value).toLocaleDateString('zh-CN') : '';
+}
+
+function formatTime(value) {
+  return value ? value.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : '';
+}
+
+function updateStatus(update) {
+  if (update.checking) return '正在检查更新…';
+  if (update.available) {
+    const published = formatDate(update.latest.publishedAt);
+    return `发现新版本 v${update.latest.version}${published ? `（${published} 发布）` : ''}`;
+  }
+  if (update.error) return `检查失败：${update.error}`;
+  if (update.latest) return `已是最新版本 · ${formatTime(update.checkedAt)} 检查`;
+  return '尚未检查';
+}
+
+export function SettingsView({ meta, update, onSave }) {
   const [roots, setRoots] = useState('');
   const [saving, setSaving] = useState(false);
+  // 只在保存过的扫描目录变化时同步，避免其他设置（例如忽略的版本）覆盖正在编辑的内容。
+  const savedRoots = (meta?.settings?.discoveryRoots || []).join('\n');
 
   useEffect(() => {
-    setRoots((meta?.settings?.discoveryRoots || []).join('\n'));
-  }, [meta]);
+    setRoots(savedRoots);
+  }, [savedRoots]);
 
   const save = async () => {
     setSaving(true);
@@ -40,6 +61,30 @@ export function SettingsView({ meta, onSave }) {
       <button className="button primary settings-save" type="button" onClick={save} disabled={saving}>
         <Save size={17} /> {saving ? '保存中…' : '保存设置'}
       </button>
+
+      <section className="settings-section update-section">
+        <div>
+          <h2>版本更新</h2>
+          <p>机舱会在启动时和之后每 6 小时到 GitHub 查看是否有新版本，只读取公开的发布信息。安装新版本不会影响已记录的服务和设置。</p>
+        </div>
+        <div className="update-status">
+          <div>
+            <strong>当前版本 {update.currentVersion ? `v${update.currentVersion}` : '—'}</strong>
+            <span className={update.available ? 'highlight' : ''}>{updateStatus(update)}</span>
+          </div>
+          {update.available ? (
+            <>
+              <a className="text-link" href={update.latest.notesUrl} target="_blank" rel="noreferrer">更新内容</a>
+              <a className="button primary" href={update.latest.downloadUrl} target="_blank" rel="noreferrer">
+                <Download size={17} /> 下载 v{update.latest.version}
+              </a>
+            </>
+          ) : null}
+          <button className="button secondary" type="button" onClick={update.check} disabled={update.checking || !update.currentVersion}>
+            <RefreshCw size={17} className={update.checking ? 'spin' : ''} /> 检查更新
+          </button>
+        </div>
+      </section>
     </div>
   );
 }

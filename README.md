@@ -85,7 +85,15 @@ npm run dev
 - 点击“添加服务”：手动填写服务名称、绝对路径、端口和启动命令。
 - 点击“启动/停止”：从项目目录执行启动命令，或安全停止由控制台启动的进程。启动命令在 macOS 上由登录 shell 执行，在 Windows 上由 `cmd.exe` 执行。
 - 点击服务行：在下方查看持续刷新的运行日志。
-- 在“设置”中：每行填写一个扫描根目录。
+- 在“设置”中：每行填写一个扫描根目录，也可以查看当前版本、手动检查更新。
+
+## 检查更新
+
+App 启动时和之后每 6 小时会请求一次 GitHub 的最新 Release（`XiangXiaoYuan5254/MachineCabin`），发现比当前版本新的版本时，在页面顶部提示用户下载。下载按钮会按系统直接指向 Release 里的 `.dmg` 或 `.exe`，找不到时打开 Release 页面。用户可以“暂时关闭”（下次打开再提醒）或“忽略此版本”（记在 `services.json` 的 `settings.skippedVersion` 里）。
+
+- 当前版本取自 `package.json` 的 `version`，由 `/api/meta` 返回。
+- 请求由界面发出，这样会沿用系统代理设置；Node.js 服务端不会联网检查。
+- 更新不会自动安装，用户下载后按常规方式安装即可，服务列表和设置保存在应用数据目录，不受影响。
 
 ## 数据与安全
 
@@ -93,6 +101,7 @@ npm run dev
 - 控制台默认只监听 `127.0.0.1`，不会向局域网公开。
 - 对于不是由控制台启动的进程，只有当进程工作目录属于服务目录时才允许停止，避免误杀同端口的其他程序。
 - 删除服务只会删除控制台中的记录，不会删除项目文件。
+- 除了检查更新时读取 GitHub 上公开的发布信息，控制台不会访问外网，也不会上传任何数据。
 
 可以使用 `VBCODING_DATA_DIR` 更改配置目录，使用 `CONSOLE_PORT` 更改控制台端口。
 
@@ -101,6 +110,7 @@ npm run dev
 官网是 `website/` 下的纯静态页面，只保存在本地，不提交到 Git（已在 `.gitignore` 中忽略）。它不需要构建，可以直接部署到任意静态托管（Nginx、GitHub Pages、Vercel、Netlify、OSS 等）。
 
 1. 在 `website/config.js` 中把 `githubRepo` 改成你的 GitHub 仓库（`用户名/仓库名`）。
+   发新版本前，同时修改 `package.json` 的 `version` 和 `macapp/Info.plist` 的 `CFBundleShortVersionString`（并把 `CFBundleVersion` 加一）。两者不一致时 `build_and_run.sh` 会拒绝构建。
 2. 构建 App 并打包 DMG：
 
    ```bash
@@ -110,7 +120,7 @@ npm run dev
 
    `package_dmg.sh` 会生成 `build/release/MachineCabin-<版本>.dmg`（不包含本机的服务列表），并把它和 `latest.json` 同步到 `website/downloads/`，官网上的版本号和大小会自动更新。
 3. 运行 `npm run dist:win` 打包 Windows 安装程序，它会同步到 `website/downloads/` 并更新 `latest-windows.json`。如果官网上没有这个安装包，“下载 Windows 版”会自动跳转到 GitHub Releases。
-4. 在 GitHub 新建 Release，上传同一个 DMG 和 EXE 文件。
+4. 在 GitHub 新建 Release，标签写成 `v<版本>`（例如 `v1.2.0`），上传同一个 DMG 和 EXE 文件，并以正式版发布（不要勾选 pre-release）。已安装的 App 就是靠这个 Release 发现新版本的。
 5. 部署 `website/` 目录。如果想把安装包放到 CDN / OSS，把 `downloadBase` 改成对应地址即可。
 
 本地预览官网：
