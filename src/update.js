@@ -1,10 +1,12 @@
-// 通过 GitHub Releases 检查新版本。请求由界面发出而不是服务端，
+// 读取官网上的版本信息检查新版本：script/package_dmg.sh 和 script/package_windows.mjs
+// 打包时生成 latest.json / latest-windows.json，随官网一起部署。请求由界面发出而不是服务端，
 // 因为 WKWebView 和 Electron 都会沿用系统代理设置，Node.js 的 fetch 不会。
-const LATEST_RELEASE_API = 'https://api.github.com/repos/XiangXiaoYuan5254/MachineCabin/releases/latest';
+const DOWNLOADS_URL = 'https://helloxxy.com/works/machine-cabin/downloads/';
+const RELEASE_NOTES_URL = 'https://github.com/XiangXiaoYuan5254/MachineCabin/releases/tag/';
 
-const installerPatterns = {
-  darwin: /\.dmg$/i,
-  win32: /\.exe$/i,
+const releaseFiles = {
+  darwin: 'latest.json',
+  win32: 'latest-windows.json',
 };
 
 function versionParts(version) {
@@ -22,34 +24,29 @@ export function compareVersions(left, right) {
   return 0;
 }
 
-// 把 GitHub Release 转成界面需要的信息；找不到当前系统的安装包时，下载链接退回到发布页。
+// 把官网的版本信息转成界面需要的信息；没有当前系统的安装包时，下载链接退回到官网下载区。
 export function parseRelease(release, platform) {
-  const version = String(release?.tag_name || '').trim().replace(/^v/i, '');
+  const version = String(release?.version || '').trim().replace(/^v/i, '');
   if (!version) throw new Error('没有读到最新版本号。');
-  const pattern = installerPatterns[platform];
-  const installer = pattern && (release.assets || []).find((asset) => pattern.test(asset.name));
+  const installer = releaseFiles[platform] && release.file;
   return {
     version,
-    notesUrl: release.html_url,
-    downloadUrl: installer?.browser_download_url || release.html_url,
-    publishedAt: release.published_at || null,
+    notesUrl: `${RELEASE_NOTES_URL}v${version}`,
+    downloadUrl: installer ? `${DOWNLOADS_URL}${encodeURIComponent(installer)}` : new URL('../#download', DOWNLOADS_URL).href,
+    publishedAt: release.date || null,
   };
 }
 
 export async function fetchLatestRelease(platform) {
   let response;
   try {
-    response = await fetch(LATEST_RELEASE_API, {
-      headers: { Accept: 'application/vnd.github+json' },
+    response = await fetch(`${DOWNLOADS_URL}${releaseFiles[platform] || releaseFiles.darwin}`, {
       cache: 'no-store',
       signal: AbortSignal.timeout(10000),
     });
   } catch {
-    throw new Error('无法连接 GitHub，请检查网络后重试。');
+    throw new Error('无法连接官网，请检查网络后重试。');
   }
-  if (response.status === 403 || response.status === 429) {
-    throw new Error('GitHub 访问次数暂时超限，请稍后再试。');
-  }
-  if (!response.ok) throw new Error(`GitHub 返回了错误（${response.status}）。`);
+  if (!response.ok) throw new Error(`官网返回了错误（${response.status}）。`);
   return parseRelease(await response.json(), platform);
 }

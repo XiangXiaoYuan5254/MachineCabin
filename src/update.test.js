@@ -12,30 +12,29 @@ test('compareVersions 按数字逐段比较版本号', () => {
 });
 
 const release = {
-  tag_name: 'v1.2.0',
-  html_url: 'https://github.com/XiangXiaoYuan5254/MachineCabin/releases/tag/v1.2.0',
-  published_at: '2026-10-01T08:00:00Z',
-  assets: [
-    { name: 'MachineCabin-1.2.0.dmg', browser_download_url: 'https://example.com/MachineCabin-1.2.0.dmg' },
-    { name: 'MachineCabin-Setup-1.2.0-x64.exe', browser_download_url: 'https://example.com/MachineCabin-Setup-1.2.0-x64.exe' },
-  ],
+  version: '1.2.0',
+  file: 'MachineCabin-1.2.0.dmg',
+  size: 1396533,
+  arch: 'arm64',
+  date: '2026-10-01',
 };
 
-test('parseRelease 按系统挑选安装包', () => {
+test('parseRelease 读取官网的版本信息', () => {
   assert.deepEqual(parseRelease(release, 'darwin'), {
     version: '1.2.0',
-    notesUrl: release.html_url,
-    downloadUrl: 'https://example.com/MachineCabin-1.2.0.dmg',
-    publishedAt: '2026-10-01T08:00:00Z',
+    notesUrl: 'https://github.com/XiangXiaoYuan5254/MachineCabin/releases/tag/v1.2.0',
+    downloadUrl: 'https://helloxxy.com/works/machine-cabin/downloads/MachineCabin-1.2.0.dmg',
+    publishedAt: '2026-10-01',
   });
-  assert.equal(parseRelease(release, 'win32').downloadUrl, 'https://example.com/MachineCabin-Setup-1.2.0-x64.exe');
+  const windows = { ...release, file: 'MachineCabin-Setup-1.2.0-x64.exe' };
+  assert.equal(parseRelease(windows, 'win32').downloadUrl, 'https://helloxxy.com/works/machine-cabin/downloads/MachineCabin-Setup-1.2.0-x64.exe');
 });
 
-test('parseRelease 没有对应安装包时链接到发布页', () => {
-  assert.equal(parseRelease(release, 'linux').downloadUrl, release.html_url);
-  assert.equal(parseRelease({ ...release, assets: [] }, 'darwin').downloadUrl, release.html_url);
+test('parseRelease 没有对应安装包时链接到官网下载区', () => {
+  assert.equal(parseRelease(release, 'linux').downloadUrl, 'https://helloxxy.com/works/machine-cabin/#download');
+  assert.equal(parseRelease({ version: '1.2.0' }, 'darwin').downloadUrl, 'https://helloxxy.com/works/machine-cabin/#download');
 });
 
 test('parseRelease 拒绝没有版本号的数据', () => {
-  assert.throws(() => parseRelease({ assets: [] }, 'darwin'), /版本号/);
+  assert.throws(() => parseRelease({ file: 'MachineCabin-1.2.0.dmg' }, 'darwin'), /版本号/);
 });

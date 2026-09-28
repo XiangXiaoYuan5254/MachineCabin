@@ -65,7 +65,7 @@ export function SettingsView({ meta, update, onSave }) {
       <section className="settings-section update-section">
         <div>
           <h2>版本更新</h2>
-          <p>机舱会在启动时和之后每 6 小时到 GitHub 查看是否有新版本，只读取公开的发布信息。安装新版本不会影响已记录的服务和设置。</p>
+          <p>机舱会在启动时和之后每 6 小时到官网 helloxxy.com 查看是否有新版本，只读取公开的版本信息。安装新版本不会影响已记录的服务和设置。</p>
         </div>
         <div className="update-status">
           <div>
