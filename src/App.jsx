@@ -331,7 +331,7 @@ export default function App() {
           </div>
         ) : null}
 
-        {activeSection === 'settings' ? <SettingsView meta={meta} update={update} onSave={saveSettings} /> : null}
+        {activeSection === 'settings' ? <SettingsView meta={meta} update={update} onSave={saveSettings} onError={showToast} /> : null}
       </main>
 
       <div className="status-bar">

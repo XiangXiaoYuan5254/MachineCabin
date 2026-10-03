@@ -2,7 +2,7 @@ import { createWriteStream, mkdirSync } from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { app, BrowserWindow, ipcMain, Menu, screen, shell, utilityProcess } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu, screen, shell, utilityProcess } from 'electron';
 
 const HOST = '127.0.0.1';
 const PREFERRED_PORT = Number(process.env.CONSOLE_PORT) || 49152;
@@ -248,6 +248,15 @@ if (!app.requestSingleInstanceLock()) {
 
   ipcMain.on('console:retry', (event) => {
     if (mainWindow && event.sender === mainWindow.webContents) restart();
+  });
+
+  ipcMain.handle('dialog:chooseDirectories', async (event) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) return [];
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      buttonLabel: '添加',
+      properties: ['openDirectory', 'multiSelections', 'createDirectory'],
+    });
+    return canceled ? [] : filePaths;
   });
 
   app.on('before-quit', () => {

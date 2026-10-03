@@ -12,3 +12,10 @@ const platformNames = { darwin: 'macOS', win32: 'Windows', linux: 'Linux' };
 export function platformName(platform) {
   return platformNames[platform] || platform;
 }
+
+// 桌面版（macOS 和 Windows App）的外壳通过 window.machineCabin 提供系统的文件夹选择框；直接用浏览器打开时没有，只能手动输入路径。
+const desktopBridge = window.machineCabin;
+
+export const canChooseDirectories = typeof desktopBridge?.chooseDirectories === 'function';
+
+export const chooseDirectories = () => desktopBridge.chooseDirectories();

@@ -1113,6 +1113,13 @@ tbody code {
   font-family: "SFMono-Regular", Consolas, monospace;
 }
 
+.settings-field-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
 .settings-section.system-info {
   gap: 0;
 }

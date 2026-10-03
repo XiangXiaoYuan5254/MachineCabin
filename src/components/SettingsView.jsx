@@ -1,5 +1,6 @@
-import { Download, RefreshCw, Save } from 'lucide-react';
+import { Download, FolderPlus, RefreshCw, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { canChooseDirectories, chooseDirectories } from '../platform.js';
 
 function formatDate(value) {
   return value ? new Date(value).toLocaleDateString('zh-CN') : '';
@@ -20,7 +21,11 @@ function updateStatus(update) {
   return '尚未检查';
 }
 
-export function SettingsView({ meta, update, onSave }) {
+function parseRoots(text) {
+  return text.split('\n').map((root) => root.trim()).filter(Boolean);
+}
+
+export function SettingsView({ meta, update, onSave, onError }) {
   const [roots, setRoots] = useState('');
   const [saving, setSaving] = useState(false);
   // 只在保存过的扫描目录变化时同步，避免其他设置（例如忽略的版本）覆盖正在编辑的内容。
@@ -33,9 +38,22 @@ export function SettingsView({ meta, update, onSave }) {
   const save = async () => {
     setSaving(true);
     try {
-      await onSave({ discoveryRoots: roots.split('\n').map((root) => root.trim()).filter(Boolean) });
+      await onSave({ discoveryRoots: parseRoots(roots) });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const addDirectories = async () => {
+    try {
+      const picked = await chooseDirectories();
+      setRoots((current) => {
+        const existing = parseRoots(current);
+        const added = picked.filter((root) => !existing.includes(root));
+        return [...existing, ...added].join('\n');
+      });
+    } catch (error) {
+      onError(error.message);
     }
   };
 
@@ -51,7 +69,14 @@ export function SettingsView({ meta, update, onSave }) {
           <p>“扫描服务”会在这些目录下查找 package.json、pyproject.toml、go.mod、Cargo.toml 和 Package.swift。</p>
         </div>
         <textarea value={roots} onChange={(event) => setRoots(event.target.value)} rows={5} aria-label="服务扫描目录" />
-        <small>每行一个绝对路径，最多向下扫描 4 层。</small>
+        <div className="settings-field-footer">
+          {canChooseDirectories ? (
+            <button className="button secondary compact" type="button" onClick={addDirectories}>
+              <FolderPlus size={15} /> 添加文件夹…
+            </button>
+          ) : null}
+          <small>{canChooseDirectories ? '也可以每行手动输入一个绝对路径' : '每行一个绝对路径'}，最多向下扫描 4 层。</small>
+        </div>
       </section>
       <section className="settings-section system-info">
         <div><span>控制台地址</span><code>{meta?.consoleUrl || '—'}</code></div>
