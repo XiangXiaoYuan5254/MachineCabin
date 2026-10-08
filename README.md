@@ -120,6 +120,8 @@ App 启动时和之后每 6 小时会读取一次官网上的版本信息（macO
    ```
 
    `package_dmg.sh` 会生成 `build/release/MachineCabin-<版本>.dmg`（不包含本机的服务列表），并把它和 `latest.json` 同步到 `website/downloads/`，官网上的版本号和大小会自动更新。
+
+   App 和 DMG 用钥匙串里的 Developer ID 证书（`Developer ID Application: Li Ming wang (46AL7LQ9T8)`，`MACHINECABIN_SIGN_IDENTITY` 可换成别的）签名并开启 hardened runtime，再交给 Apple 公证、贴上票据，用户下载后可以直接打开。公证要几分钟，期间别让 Mac 锁屏，否则读不到登录钥匙串里名为 `helloxxy-notary` 的公证凭据（`xcrun notarytool store-credentials` 保存，`MACHINECABIN_NOTARY_PROFILE` 可换成别的）。钥匙串里没有这张证书时退回临时签名、跳过公证，只适合自己用。
 3. 运行 `npm run dist:win` 打包 Windows 安装程序，它会同步到 `website/downloads/` 并更新 `latest-windows.json`。如果官网上没有这个安装包，“下载 Windows 版”会自动跳转到 GitHub Releases。
 4. 在 GitHub 新建 Release，标签写成 `v<版本>`（例如 `v1.2.0`），上传同一个 DMG 和 EXE 文件，并以正式版发布（不要勾选 pre-release）。1.2.0 靠这个 Release 发现新版本，App 里的“更新内容”也链接到它。
 5. 部署 `website/` 目录。1.2.1 起已安装的 App 读取官网上的 `latest.json` / `latest-windows.json` 发现新版本，所以部署后用户才会收到更新。如果想把安装包放到 CDN / OSS，把 `downloadBase` 改成对应地址即可（App 里的下载地址在 `src/update.js`）。
