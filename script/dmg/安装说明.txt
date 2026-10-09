@@ -1,0 +1,17 @@
+机舱 — macOS 安装说明
+
+1. 把左侧“机舱”图标拖到右侧 Applications（应用程序）文件夹。
+2. 等待复制完成，然后推出此磁盘映像。
+3. 在“应用程序”或 Spotlight 中搜索“机舱”并打开。
+
+系统要求：macOS 13 Ventura 或更高版本，Apple 芯片（M 系列），已安装 Node.js 18 或更高版本。
+还没有 Node.js 的话，用 Homebrew 安装最方便：brew install node
+
+首次打开
+机舱使用 Apple Developer ID 签名，并已通过 Apple 公证，可以直接打开。
+第一次打开时 macOS 会确认一次“这是从互联网下载的 App”，点“打开”即可。
+
+开始使用
+在“设置”里点“添加文件夹…”，选出你放项目的地方，机舱会列出里面的服务，启动、停止、看日志都只要点一下。
+
+下载与反馈：https://helloxxy.com/works/machine-cabin/

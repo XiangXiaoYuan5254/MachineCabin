@@ -39,6 +39,8 @@ notarize() {
   /usr/bin/xcrun stapler staple -q "$2"
 }
 
+command -v uvx >/dev/null || { echo "生成 DMG 需要 uv，先运行 brew install uv。" >&2; exit 1; }
+
 if [[ ! -d "$SOURCE_APP" ]]; then
   echo "找不到 $SOURCE_APP，请先运行 ./script/build_and_run.sh" >&2
   exit 1
@@ -72,15 +74,18 @@ else
     exit 1
   }
 fi
-ln -s /Applications "$DMG_ROOT/Applications"
 
-/usr/bin/hdiutil create \
-  -volname "$DISPLAY_NAME $VERSION" \
-  -srcfolder "$DMG_ROOT" \
-  -fs HFS+ \
-  -format UDZO \
-  -imagekey zlib-level=9 \
-  -ov "$DMG_PATH" >/dev/null
+# 生成 DMG：和页间的安装包一样，打开后是一个带箭头的窗口，提示把 App 拖进「应用程序」（布局见 script/dmg/）。
+# dmgbuild 由 uv 临时运行；要用 1.6.7 或更新的版本，更早的版本会多写一个背景图书签，Finder 就不显示背景了。
+DMG_WORK_DIR="$ROOT_DIR/build/dmg"
+/usr/bin/swift "$ROOT_DIR/script/dmg/background.swift" "$DMG_WORK_DIR"
+ICON_NAME="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' "$DMG_ROOT/$DISPLAY_NAME.app/Contents/Info.plist")"
+uvx --python 3.12 --from dmgbuild==1.6.7 dmgbuild -s "$ROOT_DIR/script/dmg/settings.py" \
+  -D app="$DMG_ROOT/$DISPLAY_NAME.app" \
+  -D readme="$ROOT_DIR/script/dmg/安装说明.txt" \
+  -D background="$DMG_WORK_DIR/background.png" \
+  -D icon="$DMG_ROOT/$DISPLAY_NAME.app/Contents/Resources/${ICON_NAME%.icns}.icns" \
+  "$DISPLAY_NAME $VERSION" "$DMG_PATH" >/dev/null
 rm -rf "$DMG_ROOT"
 if [[ "$SIGN_IDENTITY" != "-" ]]; then
   /usr/bin/codesign --force --timestamp --sign "$SIGN_IDENTITY" "$DMG_PATH"

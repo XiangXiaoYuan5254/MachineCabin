@@ -119,7 +119,7 @@ App 启动时和之后每 6 小时会读取一次官网上的版本信息（macO
    ./script/package_dmg.sh
    ```
 
-   `package_dmg.sh` 会生成 `build/release/MachineCabin-<版本>.dmg`（不包含本机的服务列表），并把它和 `latest.json` 同步到 `website/downloads/`，官网上的版本号和大小会自动更新。
+   `package_dmg.sh` 会生成 `build/release/MachineCabin-<版本>.dmg`（不包含本机的服务列表），并把它和 `latest.json` 同步到 `website/downloads/`，官网上的版本号和大小会自动更新。DMG 打开后是一个带箭头的窗口，提示把 App 拖进「应用程序」，和页间的安装包一样（布局见 `script/dmg/`）；它用 [dmgbuild](https://github.com/dmgbuild/dmgbuild) 生成，需要先 `brew install uv`。
 
    App 和 DMG 用钥匙串里的 Developer ID 证书（`Developer ID Application: Li Ming wang (46AL7LQ9T8)`，`MACHINECABIN_SIGN_IDENTITY` 可换成别的）签名并开启 hardened runtime，再交给 Apple 公证、贴上票据，用户下载后可以直接打开。公证要几分钟，期间别让 Mac 锁屏，否则读不到登录钥匙串里名为 `helloxxy-notary` 的公证凭据（`xcrun notarytool store-credentials` 保存，`MACHINECABIN_NOTARY_PROFILE` 可换成别的）。钥匙串里没有这张证书时退回临时签名、跳过公证，只适合自己用。
 3. 运行 `npm run dist:win` 打包 Windows 安装程序，它会同步到 `website/downloads/` 并更新 `latest-windows.json`。如果官网上没有这个安装包，“下载 Windows 版”会自动跳转到 GitHub Releases。
